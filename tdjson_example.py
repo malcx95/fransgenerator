@@ -93,6 +93,9 @@ td_send({'@type': 'getAuthorizationState', '@extra': 1.01234})
 def authorize(event):
     pass
 
+api_id = 260555
+api_hash = "9ed45def5d08193d0783b0205f54e299"
+
 # main events cycle
 while True:
     event = td_receive()
