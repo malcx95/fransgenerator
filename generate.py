@@ -2,12 +2,13 @@ import argparse
 import random
 import numpy as np
 import pdb
+import re
 
 
 def train(text):
     words = text.split()
 
-    words = [w for w in ["".join(filter(lambda x: x.isalpha(), word)).lower() for word in words] if w]
+    words = filter_words(words)#[w for w in ["".join(filter(lambda x: x.isalpha(), word)).lower() for word in words] if w]
     transitions = {}
     for i in range(len(words) - 1):
         word = words[i]
@@ -24,6 +25,24 @@ def train(text):
     return transitions
 
 
+def filter_words(words):
+    res = []
+    for word in words:
+        new_words = ['']
+        curr_i = 0
+        for c in word:
+            if c in '.,!?':
+                curr_i += 2
+                new_words.append(c)
+                new_words.append('')
+            elif c.isalpha():
+                new_words[curr_i] += c.lower()
+        res += [w for w in new_words if w]
+    return res
+
+            
+
+
 def convert_to_probabilities(transitions):
     probabilities = {}
     for next_word, next_words in transitions.items():
@@ -38,17 +57,27 @@ def convert_to_probabilities(transitions):
 
 def generate(probabilities, length):
     current_word = random.choice(list(probabilities.keys()))
-    text = [current_word]
+    text = [current_word.capitalize()]
+    capitalize = True
     for _ in range(length):
         if current_word in probabilities:
             next_words = probabilities[current_word]
             words, probs = _get_probabilities_list(next_words)
             next_word = str(np.random.choice(words, 1, p=probs)[0])
-            text.append(next_word)
+            if next_word in '.!?':
+                text[-1] += next_word
+                capitalize = True
+            elif next_word == ',':
+                text[-1] += next_word
+                capitalize = False
+            else:
+                text.append(next_word.capitalize() if capitalize else next_word)
+                capitalize = False
             current_word = next_word
         else:
-            text[-1] += random.choice(['.', '.', '.', ',', '!', '?'])
+            text[-1] += '.'
             current_word = random.choice(list(probabilities.keys()))
+            capitalize = True
     return " ".join(text)
         
 
