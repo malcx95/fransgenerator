@@ -85,9 +85,11 @@ def td_execute(query):
     return result
 
 # testing TDLib execute method
+print('\nsending test')
 print(td_execute({'@type': 'getTextEntities', 'text': '@telegram /test_command https://telegram.org telegram.me', '@extra': ['5', 7.0]}))
 
 # testing TDLib send method
+print('\nsending get for authorization state')
 td_send({'@type': 'getAuthorizationState', '@extra': 1.01234})
 
 def authorize(event):
@@ -97,19 +99,20 @@ api_id = 260555
 api_hash = "9ed45def5d08193d0783b0205f54e299"
 
 # main events cycle
-while True:
-    event = td_receive()
-    if event:
-        # if client is closed, we need to destroy it and create new client
-        if event['@type'] == 'updateAuthorizationState' and event['authorization_state']['@type'] == 'authorizationStateClosed':
-            break
+def event_loop():
+    while True:
+        event = td_receive()
+        if event:
+            # if client is closed, we need to destroy it and create new client
+            if event['@type'] == 'updateAuthorizationState' and event['authorization_state']['@type'] == 'authorizationStateClosed':
+                break
 
-        if event['@type'] == 'updateAuthorizationState' and event['authorization_state']['@type'] == 'authorizationStateWaitTdlibParameters':
-            authorize(event)
+            if event['@type'] == 'updateAuthorizationState' and event['authorization_state']['@type'] == 'authorizationStateWaitTdlibParameters':
+                authorize(event)
 
-        # handle an incoming update or an answer to a previously sent request
-        print(event)
-        sys.stdout.flush()
+            # handle an incoming update or an answer to a previously sent request
+            print('\nreceived event:\n', event)
+            sys.stdout.flush()
 
 # destroy client when it is closed and isn't needed anymore
-td_json_client_destroy(client)
+#td_json_client_destroy(client)
