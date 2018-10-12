@@ -14,14 +14,16 @@ def train(text):
         word = words[i]
         next_word = words[i + 1]
 
+
+        if word not in transitions:
+            transitions[word] = {}
+
         if word in transitions:
             next_words = transitions[word]
             if next_word in next_words:
                 next_words[next_word] += 1
             else:
                 next_words[next_word] = 1
-        else:
-            transitions[word] = {}
     return transitions
 
 
@@ -90,6 +92,11 @@ def _get_probabilities_list(next_words):
     return words, probabilities
 
 
+def generate_from(training_data, word_amount):
+    probabilities = convert_to_probabilities(training_data)
+    return generate(probabilities, word_amount)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Din mamma.")
 
@@ -103,9 +110,29 @@ def main():
     with open(args.file[0]) as f:
         text = f.read()
 
-    probabilities = convert_to_probabilities(train(text))
-    text = generate(probabilities, args.length)
+    text = generate_from(train(text), args.length)
     print(text)
+
+
+def train_from_messages_file():
+    from messages import messages
+
+    total_messages_training = {}
+    for m in messages:
+        train_result = train(m)
+
+        for word, next_words in train_result.items():
+            if word not in total_messages_training:
+                total_messages_training[word] = next_words
+            else:
+                existing_next_words = total_messages_training[word]
+                for w in next_words:
+                    if w not in existing_next_words:
+                        existing_next_words[w] = next_words[w]
+                    else:
+                        existing_next_words[w] += next_words[w]
+
+    return total_messages_training
 
 
 if __name__ == '__main__':
