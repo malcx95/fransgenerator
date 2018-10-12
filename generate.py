@@ -93,16 +93,14 @@ def _get_probabilities_list(next_words):
 def main():
     parser = argparse.ArgumentParser(description="Din mamma.")
 
-    parser.add_argument('-f', '--file', type=str,
-                        help="Text file containing training text.",
-                        required=True)
+    parser.add_argument('file', nargs=1, type=str, help="Text file containing training text.")
     parser.add_argument('-l', '--length', help='Number of words in output',
                         type=int, default=100)
 
     args = parser.parse_args()
 
     text = None
-    with open(args.file) as f:
+    with open(args.file[0]) as f:
         text = f.read()
 
     probabilities = convert_to_probabilities(train(text))
