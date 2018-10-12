@@ -30,6 +30,10 @@ def train(text):
 def filter_words(words):
     res = []
     for word in words:
+        if word in ':P:D:):(':
+            res += [word]
+            continue
+
         new_words = ['']
         curr_i = 0
         for c in word:
