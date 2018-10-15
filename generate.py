@@ -3,6 +3,7 @@ import random
 import numpy as np
 import pdb
 import re
+import importlib
 
 
 def train(text):
@@ -118,11 +119,11 @@ def main():
     print(text)
 
 
-def train_from_messages_file():
-    from messages import messages
+def train_from_messages_file(module_name):
+    module = importlib.import_module(module_name)
 
     total_messages_training = {}
-    for m in messages:
+    for m in module.messages:
         train_result = train(m)
 
         for word, next_words in train_result.items():
@@ -137,6 +138,18 @@ def train_from_messages_file():
                         existing_next_words[w] += next_words[w]
 
     return total_messages_training
+
+def get_random_user():
+    users = [
+        'Emil',
+        'Malcolm',
+        'Robin',
+        'David',
+        'Olav',
+        'Hannes',
+        'Frans'
+    ]
+    return random.choice(users)
 
 
 if __name__ == '__main__':
