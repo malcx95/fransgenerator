@@ -11,20 +11,21 @@ def train(text):
 
     words = filter_words(words)#[w for w in ["".join(filter(lambda x: x.isalpha(), word)).lower() for word in words] if w]
     transitions = {}
-    for i in range(len(words) - 1):
+    for i in range(len(words) - 2):
         word = words[i]
         next_word = words[i + 1]
-
+        sec_word = words[i + 2]
+        word_pair = (next_word, sec_word)
 
         if word not in transitions:
             transitions[word] = {}
 
         if word in transitions:
             next_words = transitions[word]
-            if next_word in next_words:
-                next_words[next_word] += 1
+            if word_pair in next_words:
+                next_words[word_pair] += 1
             else:
-                next_words[next_word] = 1
+                next_words[word_pair] = 1
     return transitions
 
 
@@ -70,17 +71,30 @@ def generate(probabilities, length):
         if current_word in probabilities:
             next_words = probabilities[current_word]
             words, probs = _get_probabilities_list(next_words)
-            next_word = str(np.random.choice(words, 1, p=probs)[0])
-            if next_word in '.!?':
-                text[-1] += next_word
+
+            index = np.random.choice(range(len(words)), 1, p=probs)[0]
+            next_word1, next_word2 = words[index]
+            if next_word1 in '.!?':
+                text[-1] += next_word1
+                text.append(next_word2.capitalize())
+                capitalize = False
+            elif next_word1 == ',':
+                text[-1] += next_word1
+                text.append(next_word2)
+                capitalize = next_word2 in '.!?'
+            elif next_word2 in '.!?':
+                text.append(next_word1.capitalize() if capitalize else next_word1)
+                text[-1] += next_word2
                 capitalize = True
-            elif next_word == ',':
-                text[-1] += next_word
+            elif next_word2 == ',':
+                text.append(next_word1)
+                text[-1] += next_word2
                 capitalize = False
             else:
-                text.append(next_word.capitalize() if capitalize else next_word)
+                text.append(next_word1.capitalize() if capitalize else next_word1)
+                text.append(next_word2)
                 capitalize = False
-            current_word = next_word
+            current_word = next_word2
         else:
             text[-1] += '.'
             current_word = random.choice(list(probabilities.keys()))
